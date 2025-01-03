@@ -81,3 +81,38 @@ export const removeTask: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateTask: RequestHandler = async (req, res, next) => {
+  const errors = validationResult(req);
+  const { title, description, isChecked, dateCreated } = req.body;
+  try {
+    // your code here
+    validationErrorParser(errors);
+    if (req.params.id != req.body._id) {
+      res.status(400);
+    }
+
+    const task = await TaskModel.findByIdAndUpdate(
+      {
+        _id: req.params.id,
+      },
+      {
+        title,
+        description,
+        isChecked,
+        dateCreated,
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (task === null) {
+      res.status(404);
+    }
+
+    res.status(200).json(task);
+  } catch (error) {
+    next(error);
+  }
+};
