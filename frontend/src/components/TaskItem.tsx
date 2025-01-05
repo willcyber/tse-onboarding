@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Task, updateTask } from "src/api/tasks";
-import { CheckButton } from "src/components";
+import { CheckButton, UserTag } from "src/components";
 import styles from "src/components/TaskItem.module.css";
 import { Link } from "react-router-dom";
 
@@ -51,6 +51,7 @@ export function TaskItem({ task: initialTask }: TaskItemProps) {
         </Link>
         {task.description && <span className={styles.description}>{task.description}</span>}
       </div>
+      <UserTag user={task.assignee} />
     </div>
   );
 }
