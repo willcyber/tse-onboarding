@@ -30,7 +30,7 @@ export const getTask: RequestHandler = async (req, res, next) => {
 
   try {
     // if the ID doesn't exist, then findById returns null
-    const task = await TaskModel.findById(id);
+    const task = await TaskModel.findById(id).populate("assignee").exec();
 
     if (task === null) {
       throw createHttpError(404, "Task not found.");
@@ -49,7 +49,7 @@ export const getTask: RequestHandler = async (req, res, next) => {
 export const createTask: RequestHandler = async (req, res, next) => {
   // extract any errors that were found by the validator
   const errors = validationResult(req);
-  const { title, description, isChecked } = req.body;
+  const { title, description, isChecked, assignee } = req.body;
 
   try {
     // if there are errors, then this function throws an exception
@@ -59,6 +59,7 @@ export const createTask: RequestHandler = async (req, res, next) => {
       title: title,
       description: description,
       isChecked: isChecked,
+      assignee: assignee,
       dateCreated: Date.now(),
     });
 
@@ -74,7 +75,7 @@ export const removeTask: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const result = await TaskModel.deleteOne({ _id: id });
+    const result = await TaskModel.deleteOne({ _id: id }).populate("assignee").exec();
 
     res.status(200).json(result);
   } catch (error) {
@@ -84,7 +85,7 @@ export const removeTask: RequestHandler = async (req, res, next) => {
 
 export const updateTask: RequestHandler = async (req, res, next) => {
   const errors = validationResult(req);
-  const { title, description, isChecked, dateCreated } = req.body;
+  const { title, description, isChecked, dateCreated, assignee } = req.body;
   try {
     // your code here
     validationErrorParser(errors);
@@ -101,11 +102,17 @@ export const updateTask: RequestHandler = async (req, res, next) => {
         description,
         isChecked,
         dateCreated,
+        assignee,
+        $unset: {
+          assignee: !assignee ? "" : undefined,
+        },
       },
       {
         new: true,
       },
-    );
+    )
+      .populate("assignee")
+      .exec();
 
     if (task === null) {
       res.status(404);
