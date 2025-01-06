@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
 import { getTask } from "src/api/tasks";
-import { Button, Page } from "src/components";
+import { Button, Page, TaskForm, UserTag } from "src/components";
 
 import type { Task } from "src/api/tasks";
 
 export function TaskDetail() {
   const [task, setTask] = useState<Task | null>(null);
   const taskId = useParams<{ id: string }>().id;
+  const [isEditing, setisEditing] = useState<boolean>(false); // initially false
 
   useEffect(() => {
     if (!taskId) {
@@ -31,15 +32,22 @@ export function TaskDetail() {
       <p>
         <Link to="/">Back to home</Link>
       </p>
-      {task === null ? (
-        // eslint-disable-next-line react/no-unescaped-entities
-        <p>This task doesn't exist!</p>
-      ) : (
+      {isEditing && task ? (
+        <TaskForm
+          mode="edit"
+          task={task}
+          onSubmit={(updatedTask) => {
+            setTask(updatedTask);
+            setisEditing(false);
+          }}
+        />
+      ) : task ? (
         <>
-          <Button label="Edit Task" />
-          <span>{task.description ? task.description : "(No description)"}</span>
+          <Button label="Edit Task" onClick={() => setisEditing(true)} />
+          <span>{task.description || "(No description)"}</span>
           <div>
             <span>Assignee</span>
+            <UserTag user={task.assignee} />
           </div>
           <div>
             <span>Status </span>
@@ -55,6 +63,9 @@ export function TaskDetail() {
             </span>
           </div>
         </>
+      ) : (
+        // eslint-disable-next-line react/no-unescaped-entities
+        <p>This task doesn't exist!</p>
       )}
     </Page>
   );
