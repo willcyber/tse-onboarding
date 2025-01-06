@@ -116,7 +116,7 @@ export function TaskForm({ mode, task, onSubmit }: TaskFormProps) {
         />
         <TextField
           className={`${styles.textField} ${styles.stretch}`}
-          data-testid="task-description-input"
+          data-testid="task-assignee-input"
           label="Assignee ID (optional)"
           value={assignee}
           onChange={(event) => setAssignee(event.target.value)}
